@@ -1,7 +1,7 @@
 # PbO-MWC
 PbO for Maximum Vertex Weight Clique Problem
 
-./PbO -inst <instance-file> -seed <seed-num> -cutoff <cutoff-time>
+./PbO -inst "instance-file" -seed "seed-num" -cutoff "cutoff-time"
   
 eg:  an optimal configuration for solving frb instances (weighted version)
 
