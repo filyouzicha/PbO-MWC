@@ -67,6 +67,11 @@ int backtract_scc_tabu (int SelN);
 extern int backtract_tabu_co_d (int SelN);
 extern int backtract_edge (int SelN);
 
+extern int backtract_tabu_tabul2 (int SelN);
+extern int backtract_tabu_tabul3 (int SelN);
+extern int backtract_tabu_tabul3_C1 (int SelN);
+extern int backtract_tabu_tabul3_randomC1 (int SelN);
+
 extern double CO;
 extern double CO_D;
 extern double CO_S;
@@ -86,6 +91,10 @@ int plateau_scc_with_tabu(int SelN);
 extern int plateau_edge(int SelN);
 extern int plateau_tabu_new(int SelN);
 extern int plateau_tabu_co(int SelN);
+
+extern int plateau_tabu_tabul2(int SelN);
+extern int plateau_tabu_tabul2_C1(int SelN);
+extern int plateau_tabu_tabul2_randomC1(int SelN);
 
 extern int** edge_forbidden;
 

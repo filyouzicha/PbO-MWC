@@ -123,6 +123,7 @@ void smooth_weight_swt() {
         sum_crafted_weight += We_penalty[i];
     }
     averaged_crafted_weight = sum_crafted_weight/Max_Vtx;
+    //cout << averaged_crafted_weight << endl;
     return;
 }
 void increase_penalty_weight_swt(double w) {
@@ -132,6 +133,7 @@ void increase_penalty_weight_swt(double w) {
         sum_crafted_weight += w;
     }
     averaged_crafted_weight = sum_crafted_weight/Max_Vtx;
+    //cout << averaged_crafted_weight << endl;
     return;
 }
 void update_weight_SWT_scheme() {
@@ -340,7 +342,7 @@ int expand_tabu_with_scc(int SelN) {
     address[ n1 ] = k1;
     //time_stamp[m] = Iter;
     time_stamp[m] = Num_Iter;
-    tabuin[m] = Iter + DTABUL;
+
     for(i=0; i<neighbor_len[m]; i++){
         node2 = neighbor[m][i];
         tabuin[node2] = Iter;
@@ -470,10 +472,10 @@ int expand_edge(int SelN) {
     for( i = 0; i < adjaclen[ m ]; i++ )
     {
         n = adjacMatrix[ m ][ i ];
-        funch[ n ]++; //  funch[n] traces the number of nodes that are in the current clique
+        funch[ n ]++; // WYY: funch[n] traces the number of nodes that are in the current clique
 
         if( funch[ n ] == 1 )
-        {   //  remove n from C0
+        {   // WYY: remove n from C0
             k1 = address[ n ];
             len0--;
             n1 = C0[ len0 ];
@@ -485,7 +487,7 @@ int expand_edge(int SelN) {
             address[ n ] = len1;
             len1++;
 
-            BC[ n ] = m; //  BC[n] = m denotes that n is Being Connected by m.
+            BC[ n ] = m; // WYY: BC[n] = m denotes that n is Being Connected by m.
         }
         else if( funch[ n ] == 2 )
         {
@@ -520,7 +522,7 @@ int expand_scc(int SelN) {
     vectex[ m ] = 1; // set the flag?
     Wf = Wf + We[ m ]; // Wf is the weight of the current clique, i,e, weight found. update it.
 
-    /*  set the nodes in cruset as neighbors of m, and vice versa */
+    /* WYY: set the nodes in cruset as neighbors of m, and vice versa */
     /*if(DEBUG) {
       printf("\nin expand");
       printf("\nadd node %d", m);
@@ -548,10 +550,10 @@ int expand_scc(int SelN) {
     for( i = 0; i < adjaclen[ m ]; i++ )
     {
         n = adjacMatrix[ m ][ i ];
-        funch[ n ]++; //  funch[n] traces the number of nodes that are in the current clique
+        funch[ n ]++; // WYY: funch[n] traces the number of nodes that are in the current clique
 
         if( funch[ n ] == 1 )
-        {   //  remove n from C0
+        {   // WYY: remove n from C0
             k1 = address[ n ];
             len0--;
             n1 = C0[ len0 ];
@@ -563,7 +565,7 @@ int expand_scc(int SelN) {
             address[ n ] = len1;
             len1++;
 
-            BC[ n ] = m; //  BC[n] = m denotes that n is Being Connected by m.
+            BC[ n ] = m; // WYY: BC[n] = m denotes that n is Being Connected by m.
         }
         else if( funch[ n ] == 2 )
         {
@@ -616,10 +618,10 @@ int expand_cc(int SelN) {
     for( i = 0; i < adjaclen[ m ]; i++ )
     {
         n = adjacMatrix[ m ][ i ];
-        funch[ n ]++; //  funch[n] traces the number of nodes that are in the current clique
+        funch[ n ]++; // WYY: funch[n] traces the number of nodes that are in the current clique
 
         if( funch[ n ] == 1 )
-        {   //  remove n from C0
+        {   // WYY: remove n from C0
             k1 = address[ n ];
             len0--;
             n1 = C0[ len0 ];
@@ -631,7 +633,7 @@ int expand_cc(int SelN) {
             address[ n ] = len1;
             len1++;
 
-            BC[ n ] = m; //  BC[n] = m denotes that n is Being Connected by m.
+            BC[ n ] = m; // WYY: BC[n] = m denotes that n is Being Connected by m.
         }
         else if( funch[ n ] == 2 )
         {
@@ -747,6 +749,178 @@ int backtract_edge(int SelN) {
     //update_hash_backtract_ptr(m1);
     return 0;
 }
+int backtract_tabu_tabul3_C1(int SelN) {
+    int i, j, k, l, m, m1, n, k1, n1;
+    if( SelN == -1 )
+        return -1;
+    m1 = cruset[ SelN ];
+    Wf = Wf - We[ m1 ];
+    vectex[ m1 ] = 0;
+    //tabuin[ m1 ] = Iter + TABUL;
+    //tabuin[ m1 ] = Iter + TABUL + randomInt(len0 + 2);//(neighbor_len[m1]-len + 2);
+    len--;
+    cruset[ SelN ] = cruset[ len ];
+    C0[ len0 ] = m1;
+    address[ m1 ] = len0;
+    len0++;
+    time_stamp[m1] = Num_Iter; //modify by cy
+
+    for( i = 0; i < adjaclen[ m1 ]; i++ ) {
+        n = adjacMatrix[ m1 ][ i ];
+        funch[ n ]--;
+        if( (funch[ n ] == 0) && (vectex[ n ] == 0) )
+        {
+            k1 = address[ n ];           
+            len1--;
+            n1 = C1[ len1 ];
+            C1[ k1 ] = n1;
+            address[ n1 ] = k1;
+
+            C0[ len0 ] = n;
+            address[ n ] = len0;
+            len0++;
+        }
+        else if( funch[ n ] == 1 )
+        {
+            C1[ len1 ] = n;
+            address[ n ] = len1;
+            len1++;
+        }
+    }
+    tabuin[ m1 ] = Iter + DTABUL + len1;
+    //restart
+    //update_hash_backtract_ptr(m1);
+    return 0;
+}
+int backtract_tabu_tabul3_randomC1(int SelN) {
+    int i, j, k, l, m, m1, n, k1, n1;
+    if( SelN == -1 )
+        return -1;
+    m1 = cruset[ SelN ];
+    Wf = Wf - We[ m1 ];
+    vectex[ m1 ] = 0;
+    //tabuin[ m1 ] = Iter + TABUL;
+    //tabuin[ m1 ] = Iter + TABUL + randomInt(len0 + 2);//(neighbor_len[m1]-len + 2);
+    len--;
+    cruset[ SelN ] = cruset[ len ];
+    C0[ len0 ] = m1;
+    address[ m1 ] = len0;
+    len0++;
+    time_stamp[m1] = Num_Iter; //modify by cy
+
+    for( i = 0; i < adjaclen[ m1 ]; i++ ) {
+        n = adjacMatrix[ m1 ][ i ];
+        funch[ n ]--;
+        if( (funch[ n ] == 0) && (vectex[ n ] == 0) )
+        {
+            k1 = address[ n ];           
+            len1--;
+            n1 = C1[ len1 ];
+            C1[ k1 ] = n1;
+            address[ n1 ] = k1;
+
+            C0[ len0 ] = n;
+            address[ n ] = len0;
+            len0++;
+        }
+        else if( funch[ n ] == 1 )
+        {
+            C1[ len1 ] = n;
+            address[ n ] = len1;
+            len1++;
+        }
+    }
+    tabuin[ m1 ] = Iter + DTABUL + randomInt(len1+2);
+    //restart
+    //update_hash_backtract_ptr(m1);
+    return 0;
+}
+int backtract_tabu_tabul2(int SelN) {
+    int i, j, k, l, m, m1, n, k1, n1;
+    if( SelN == -1 )
+        return -1;
+    m1 = cruset[ SelN ];
+    Wf = Wf - We[ m1 ];
+    vectex[ m1 ] = 0;
+    //tabuin[ m1 ] = Iter + TABUL;
+    //tabuin[ m1 ] = Iter + TABUL + randomInt(len0 + 2);//(neighbor_len[m1]-len + 2);
+    len--;
+    cruset[ SelN ] = cruset[ len ];
+    C0[ len0 ] = m1;
+    address[ m1 ] = len0;
+    len0++;
+    time_stamp[m1] = Num_Iter; //modify by cy
+
+    for( i = 0; i < adjaclen[ m1 ]; i++ ) {
+        n = adjacMatrix[ m1 ][ i ];
+        funch[ n ]--;
+        if( (funch[ n ] == 0) && (vectex[ n ] == 0) )
+        {
+            k1 = address[ n ];           
+            len1--;
+            n1 = C1[ len1 ];
+            C1[ k1 ] = n1;
+            address[ n1 ] = k1;
+
+            C0[ len0 ] = n;
+            address[ n ] = len0;
+            len0++;
+        }
+        else if( funch[ n ] == 1 )
+        {
+            C1[ len1 ] = n;
+            address[ n ] = len1;
+            len1++;
+        }
+    }
+    tabuin[ m1 ] = Iter + STABUL;// + randomInt(len0+2);
+    //restart
+    //update_hash_backtract_ptr(m1);
+    return 0;
+}
+int backtract_tabu_tabul3(int SelN) {
+    int i, j, k, l, m, m1, n, k1, n1;
+    if( SelN == -1 )
+        return -1;
+    m1 = cruset[ SelN ];
+    Wf = Wf - We[ m1 ];
+    vectex[ m1 ] = 0;
+    //tabuin[ m1 ] = Iter + TABUL;
+    //tabuin[ m1 ] = Iter + TABUL + randomInt(len0 + 2);//(neighbor_len[m1]-len + 2);
+    len--;
+    cruset[ SelN ] = cruset[ len ];
+    C0[ len0 ] = m1;
+    address[ m1 ] = len0;
+    len0++;
+    time_stamp[m1] = Num_Iter; //modify by cy
+
+    for( i = 0; i < adjaclen[ m1 ]; i++ ) {
+        n = adjacMatrix[ m1 ][ i ];
+        funch[ n ]--;
+        if( (funch[ n ] == 0) && (vectex[ n ] == 0) )
+        {
+            k1 = address[ n ];           
+            len1--;
+            n1 = C1[ len1 ];
+            C1[ k1 ] = n1;
+            address[ n1 ] = k1;
+
+            C0[ len0 ] = n;
+            address[ n ] = len0;
+            len0++;
+        }
+        else if( funch[ n ] == 1 )
+        {
+            C1[ len1 ] = n;
+            address[ n ] = len1;
+            len1++;
+        }
+    }
+    tabuin[ m1 ] = Iter + DTABUL;// + randomInt(len0+2);
+    //restart
+    //update_hash_backtract_ptr(m1);
+    return 0;
+}
 int backtract_tabu_co_d(int SelN) {
     int i, j, k, l, m, m1, n, k1, n1;
     if( SelN == -1 )
@@ -846,7 +1020,7 @@ int backtract_scc(int SelN) {
     len--;
     cruset[ SelN ] = cruset[ len ];
 
-    /*  functions of neighborhood updating */
+    /* WYY: functions of neighborhood updating */
     //neighbor_drop(m1);
     conf_change[m1] = 0;
     time_stamp[m1] = Num_Iter; //modify by cy
@@ -895,7 +1069,7 @@ int backtract_cc(int SelN) {
     len--;
     cruset[ SelN ] = cruset[ len ];
 
-    /*  functions of neighborhood updating */
+    /* WYY: functions of neighborhood updating */
     conf_change[m1] = 0;
     time_stamp[m1] = Num_Iter; //modify by cy
 
@@ -932,7 +1106,8 @@ int backtract_cc(int SelN) {
             len1++;
         }
     }
-    return 0;
+    //restart
+    //update_hash_backtract_ptr(m1);
 }
 int backtract_scc_tabu(int SelN) {
     int i, j, k, l, m, m1, n, k1, n1;
@@ -1037,7 +1212,7 @@ int plateau_tabu_constant(int SelN) {
     //the backtrack process, delete m1 from the current independent set
     vectex[ m1 ] = 0;
     //cout << "len1 = " << len1 << endl;
-    tabuin[ m1 ] = Iter + TABUL;
+    tabuin[ m1 ] = Iter + TABUL; + randomInt( len1+2 );
     len--;
     cruset[ ti ] = cruset[ len ];
     C1[ len1 ] = m1;
@@ -1185,6 +1360,370 @@ int plateau_dynamic_tabu(int SelN) {
     }
     return 1;   
 }
+
+int plateau_tabu_tabul2_randomC1(int SelN) {
+    int i, j, k, k1, l, m0, m, m1, n, n1, mm1, ti;
+
+    m = C1[ SelN  ];
+    for(ti = 0; ti < len; ti++)
+    {
+        m1 = cruset[ ti ];
+        if(0 == Edge[m1][m])
+            //if(1 == edge_is(m1, m))
+            break;
+    }
+
+    Wf = Wf + We[ m ] - We[ m1 ];
+    tabuin[ m1 ] = Iter + STABUL + randomInt(len1+2);
+    
+    //the expand process, put m into the current independent set
+    vectex[ m ] = 1;
+    cruset[ len++ ] = m;
+    //delete m from C1
+    k1 = address[ m ];
+    len1--;
+    n1 = C1[ len1 ];
+    C1[ k1 ] = n1;
+    address[ n1 ] = k1;
+
+    /*memset(temp_array, 0, sizeof(int)*Max_Vtx);
+      for(i=0;i<neighbor_len[m];i++){
+      n=neighbor[m][i];
+      temp_array[n]=1;
+      }
+
+      for(auto i:remaining_vertex) {
+      if(i==m)continue;
+      if(temp_array[i]==1)continue;
+      n=i;
+      */
+    for( i = 0; i < adjaclen[ m ]; i++ ) {
+        n = adjacMatrix[ m ][ i ];
+        funch[ n ]++;
+        if( (funch[ n ] == 1) && ( vectex[ n ] == 0 ) )
+        {
+            //cout << "tt k1 = " << k1 << "len0 = " << len0 << "n = " << n << "m = " << m << " m1 = " << m1 << endl;
+            k1 = address[ n ];
+            len0--;
+            n1 = C0[ len0 ];
+            C0[ k1 ] = n1;
+            address[ n1 ] = k1;
+
+            C1[ len1 ] = n;
+            address[ n ] = len1;
+            len1++;
+            BC[ n ] = m;
+
+            //getchar();
+        }
+        if( funch[ n ] == 2 )
+        {
+            len1--;
+            n1 = C1[ len1 ];
+            k1 = address[ n ];
+            C1[ k1 ] = n1;
+            address[ n1 ] = k1;
+        }        
+    } 
+
+    //the backtrack process, delete m1 from the current independent set
+    vectex[ m1 ] = 0;
+    len--;
+    cruset[ ti ] = cruset[ len ];
+    C1[ len1 ] = m1;
+    address[ m1 ] = len1;
+    len1++;
+    time_stamp[m] = Num_Iter;   //add
+    time_stamp[m1] = Num_Iter;  //delete
+
+    /*memset(temp_array, 0, sizeof(int)*Max_Vtx);
+      for(i=0;i<neighbor_len[m1];i++){
+      n=neighbor[m1][i];
+      temp_array[n]=1;
+      }
+      for(auto i:remaining_vertex) {
+      if(i==m1)continue;
+      if(temp_array[i]==1)continue;
+      n=i;
+      */
+    for( i = 0; i < adjaclen[ m1 ]; i++ ) {
+        n = adjacMatrix[ m1 ][ i ];
+        funch[ n ]--;
+        if( (funch[ n ] == 0) && (vectex[ n ] == 0) )
+        {
+            k1 = address[ n ];           
+            len1--;
+            n1 = C1[ len1 ];
+            C1[ k1 ] = n1;
+            address[ n1 ] = k1;
+
+            C0[ len0 ] = n;
+            address[ n ] = len0;
+            len0++;
+        }
+        else if( funch[ n ] == 1 )
+        {
+            C1[ len1 ] = n;
+            address[ n ] = len1;
+            len1++;
+        }
+    }
+
+    //restart
+    //update_hash_plateau_ptr(m, m1);
+    if( Wf > Wbest )
+    {
+        times(&finish);
+        real_solve2 = double(finish.tms_utime - start.tms_utime + finish.tms_stime - start.tms_stime)/sysconf(_SC_CLK_TCK);
+        real_solve2 = round(real_solve2 * 100)/100.0; 
+        Wbest = Wf;
+        len_best = len;
+        
+    }
+    return 1;   
+}
+int plateau_tabu_tabul2(int SelN) {
+    int i, j, k, k1, l, m0, m, m1, n, n1, mm1, ti;
+
+    m = C1[ SelN  ];
+    for(ti = 0; ti < len; ti++)
+    {
+        m1 = cruset[ ti ];
+        if(0 == Edge[m1][m])
+            //if(1 == edge_is(m1, m))
+            break;
+    }
+
+    Wf = Wf + We[ m ] - We[ m1 ];
+
+    //the expand process, put m into the current independent set
+    vectex[ m ] = 1;
+    cruset[ len++ ] = m;
+    //delete m from C1
+    k1 = address[ m ];
+    len1--;
+    n1 = C1[ len1 ];
+    C1[ k1 ] = n1;
+    address[ n1 ] = k1;
+
+    /*memset(temp_array, 0, sizeof(int)*Max_Vtx);
+      for(i=0;i<neighbor_len[m];i++){
+      n=neighbor[m][i];
+      temp_array[n]=1;
+      }
+
+      for(auto i:remaining_vertex) {
+      if(i==m)continue;
+      if(temp_array[i]==1)continue;
+      n=i;
+      */
+    for( i = 0; i < adjaclen[ m ]; i++ ) {
+        n = adjacMatrix[ m ][ i ];
+        funch[ n ]++;
+        if( (funch[ n ] == 1) && ( vectex[ n ] == 0 ) )
+        {
+            //cout << "tt k1 = " << k1 << "len0 = " << len0 << "n = " << n << "m = " << m << " m1 = " << m1 << endl;
+            k1 = address[ n ];
+            len0--;
+            n1 = C0[ len0 ];
+            C0[ k1 ] = n1;
+            address[ n1 ] = k1;
+
+            C1[ len1 ] = n;
+            address[ n ] = len1;
+            len1++;
+            BC[ n ] = m;
+
+            //getchar();
+        }
+        if( funch[ n ] == 2 )
+        {
+            len1--;
+            n1 = C1[ len1 ];
+            k1 = address[ n ];
+            C1[ k1 ] = n1;
+            address[ n1 ] = k1;
+        }        
+    } 
+
+    //the backtrack process, delete m1 from the current independent set
+    vectex[ m1 ] = 0;
+    len--;
+    cruset[ ti ] = cruset[ len ];
+    C1[ len1 ] = m1;
+    address[ m1 ] = len1;
+    len1++;
+    time_stamp[m] = Num_Iter;   //add
+    time_stamp[m1] = Num_Iter;  //delete
+
+    /*memset(temp_array, 0, sizeof(int)*Max_Vtx);
+      for(i=0;i<neighbor_len[m1];i++){
+      n=neighbor[m1][i];
+      temp_array[n]=1;
+      }
+      for(auto i:remaining_vertex) {
+      if(i==m1)continue;
+      if(temp_array[i]==1)continue;
+      n=i;
+      */
+    for( i = 0; i < adjaclen[ m1 ]; i++ ) {
+        n = adjacMatrix[ m1 ][ i ];
+        funch[ n ]--;
+        if( (funch[ n ] == 0) && (vectex[ n ] == 0) )
+        {
+            k1 = address[ n ];           
+            len1--;
+            n1 = C1[ len1 ];
+            C1[ k1 ] = n1;
+            address[ n1 ] = k1;
+
+            C0[ len0 ] = n;
+            address[ n ] = len0;
+            len0++;
+        }
+        else if( funch[ n ] == 1 )
+        {
+            C1[ len1 ] = n;
+            address[ n ] = len1;
+            len1++;
+        }
+    }
+
+    tabuin[ m1 ] = Iter + STABUL ;
+    //restart
+    //update_hash_plateau_ptr(m, m1);
+    if( Wf > Wbest )
+    {
+        times(&finish);
+        real_solve2 = double(finish.tms_utime - start.tms_utime + finish.tms_stime - start.tms_stime)/sysconf(_SC_CLK_TCK);
+        real_solve2 = round(real_solve2 * 100)/100.0; 
+        Wbest = Wf;
+        len_best = len;
+        
+    }
+    return 1;   
+}
+int plateau_tabu_tabul2_C1(int SelN) {
+    int i, j, k, k1, l, m0, m, m1, n, n1, mm1, ti;
+
+    m = C1[ SelN  ];
+    for(ti = 0; ti < len; ti++)
+    {
+        m1 = cruset[ ti ];
+        if(0 == Edge[m1][m])
+            //if(1 == edge_is(m1, m))
+            break;
+    }
+
+    Wf = Wf + We[ m ] - We[ m1 ];
+
+    //the expand process, put m into the current independent set
+    vectex[ m ] = 1;
+    cruset[ len++ ] = m;
+    //delete m from C1
+    k1 = address[ m ];
+    len1--;
+    n1 = C1[ len1 ];
+    C1[ k1 ] = n1;
+    address[ n1 ] = k1;
+
+    /*memset(temp_array, 0, sizeof(int)*Max_Vtx);
+      for(i=0;i<neighbor_len[m];i++){
+      n=neighbor[m][i];
+      temp_array[n]=1;
+      }
+
+      for(auto i:remaining_vertex) {
+      if(i==m)continue;
+      if(temp_array[i]==1)continue;
+      n=i;
+      */
+    for( i = 0; i < adjaclen[ m ]; i++ ) {
+        n = adjacMatrix[ m ][ i ];
+        funch[ n ]++;
+        if( (funch[ n ] == 1) && ( vectex[ n ] == 0 ) )
+        {
+            //cout << "tt k1 = " << k1 << "len0 = " << len0 << "n = " << n << "m = " << m << " m1 = " << m1 << endl;
+            k1 = address[ n ];
+            len0--;
+            n1 = C0[ len0 ];
+            C0[ k1 ] = n1;
+            address[ n1 ] = k1;
+
+            C1[ len1 ] = n;
+            address[ n ] = len1;
+            len1++;
+            BC[ n ] = m;
+
+            //getchar();
+        }
+        if( funch[ n ] == 2 )
+        {
+            len1--;
+            n1 = C1[ len1 ];
+            k1 = address[ n ];
+            C1[ k1 ] = n1;
+            address[ n1 ] = k1;
+        }        
+    } 
+
+    //the backtrack process, delete m1 from the current independent set
+    vectex[ m1 ] = 0;
+    len--;
+    cruset[ ti ] = cruset[ len ];
+    C1[ len1 ] = m1;
+    address[ m1 ] = len1;
+    len1++;
+    time_stamp[m] = Num_Iter;   //add
+    time_stamp[m1] = Num_Iter;  //delete
+
+    /*memset(temp_array, 0, sizeof(int)*Max_Vtx);
+      for(i=0;i<neighbor_len[m1];i++){
+      n=neighbor[m1][i];
+      temp_array[n]=1;
+      }
+      for(auto i:remaining_vertex) {
+      if(i==m1)continue;
+      if(temp_array[i]==1)continue;
+      n=i;
+      */
+    for( i = 0; i < adjaclen[ m1 ]; i++ ) {
+        n = adjacMatrix[ m1 ][ i ];
+        funch[ n ]--;
+        if( (funch[ n ] == 0) && (vectex[ n ] == 0) )
+        {
+            k1 = address[ n ];           
+            len1--;
+            n1 = C1[ len1 ];
+            C1[ k1 ] = n1;
+            address[ n1 ] = k1;
+
+            C0[ len0 ] = n;
+            address[ n ] = len0;
+            len0++;
+        }
+        else if( funch[ n ] == 1 )
+        {
+            C1[ len1 ] = n;
+            address[ n ] = len1;
+            len1++;
+        }
+    }
+
+    tabuin[ m1 ] = Iter + STABUL + len1;
+    //restart
+    //update_hash_plateau_ptr(m, m1);
+    if( Wf > Wbest )
+    {
+        times(&finish);
+        real_solve2 = double(finish.tms_utime - start.tms_utime + finish.tms_stime - start.tms_stime)/sysconf(_SC_CLK_TCK);
+        real_solve2 = round(real_solve2 * 100)/100.0; 
+        Wbest = Wf;
+        len_best = len;
+        
+    }
+    return 1;   
+}
 int plateau_tabu_co(int SelN) {
     int i, j, k, k1, l, m0, m, m1, n, n1, mm1, ti;
 
@@ -1199,7 +1738,6 @@ int plateau_tabu_co(int SelN) {
 
     Wf = Wf + We[ m ] - We[ m1 ];
 
-    tabuin[m] = Iter + DTABUL;
     //the expand process, put m into the current independent set
     vectex[ m ] = 1;
     cruset[ len++ ] = m;
@@ -1563,7 +2101,7 @@ int plateau_hscc(int SelN) {
     int i, j, k, k1, l, m0, m, m1, n, n1, mm1, ti;
 
     m = C1[ SelN  ];
-    //  swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
+    // WYY: swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
     for(ti = 0; ti < len; ti++)
     {
         m1 = cruset[ ti ];
@@ -1677,7 +2215,7 @@ int plateau_edge(int SelN) {
     int i, j, k, k1, l, m0, m, m1, n, n1, mm1, ti;
 
     m = C1[ SelN  ];
-    //  swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
+    // WYY: swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
     for(ti = 0; ti < len; ti++)
     {
         m1 = cruset[ ti ];
@@ -1762,6 +2300,14 @@ int plateau_edge(int SelN) {
     address[ m1 ] = len1;
     len1++;
 
+    //tabuin[ m1 ] = Iter + TABUL + randomInt( len1+2 );
+    /* WYY: neighborhood updating */
+    /*if(DEBUG) {
+      printf("\nin plateau: remove node %d", m1);
+      dump_neighborhood();
+      }*/
+    //neighbor_drop(m1);
+    //conf_change[m1] = 0;
     time_stamp[m] = Num_Iter;  //add
     time_stamp[m1] = Num_Iter; //delete
     /*for(i=0;i<Max_Vtx;i++)
@@ -1824,7 +2370,7 @@ int plateau_scc(int SelN) {
     int i, j, k, k1, l, m0, m, m1, n, n1, mm1, ti;
 
     m = C1[ SelN  ];
-    //  swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
+    // WYY: swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
     for(ti = 0; ti < len; ti++)
     {
         m1 = cruset[ ti ];
@@ -1840,7 +2386,7 @@ int plateau_scc(int SelN) {
     vectex[ m ] = 1;
     cruset[ len++ ] = m;
 
-    /*  set the nodes in cruset as neighbors of m, and vice versa */
+    /* WYY: set the nodes in cruset as neighbors of m, and vice versa */
     /*if(DEBUG) {
       printf("\nin plateau: add node %d", m);
       dump_cur_clique();
@@ -1909,6 +2455,12 @@ int plateau_scc(int SelN) {
     address[ m1 ] = len1;
     len1++;
 
+    /* WYY: neighborhood updating */
+    /*if(DEBUG) {
+      printf("\nin plateau: remove node %d", m1);
+      dump_neighborhood();
+      }*/
+    //neighbor_drop(m1);
     conf_change[m1] = 0;
     time_stamp[m] = Num_Iter;  //add
     time_stamp[m1] = Num_Iter; //delete
@@ -1972,7 +2524,7 @@ int plateau_cc(int SelN) {
     int i, j, k, k1, l, m0, m, m1, n, n1, mm1, ti, node2;
 
     m = C1[ SelN  ];
-    //  swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
+    // WYY: swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
     for(ti = 0; ti < len; ti++)
     {
         m1 = cruset[ ti ];
@@ -2085,7 +2637,7 @@ int plateau_scc_ctabu(int SelN) {
     int i, j, k, k1, l, m0, m, m1, n, n1, mm1, ti;
 
     m = C1[ SelN  ];
-    //  swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
+    // WYY: swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
     for(ti = 0; ti < len; ti++)
     {
         m1 = cruset[ ti ];
@@ -2194,7 +2746,7 @@ int plateau_hscc_ctabu(int SelN) {
     int i, j, k, k1, l, m0, m, m1, n, n1, mm1, ti;
 
     m = C1[ SelN  ];
-    //  swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
+    // WYY: swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
     for(ti = 0; ti < len; ti++)
     {
         m1 = cruset[ ti ];
@@ -2307,7 +2859,7 @@ int plateau_scc_tabu(int SelN) {
     int i, j, k, k1, l, m0, m, m1, n, n1, mm1, ti;
 
     m = C1[ SelN  ];
-    //  swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
+    // WYY: swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
     for(ti = 0; ti < len; ti++)
     {
         m1 = cruset[ ti ];
@@ -2419,7 +2971,7 @@ int forbidden_tabu(int node2) {
 int plateau_scc_with_tabu(int SelN) {
     int i, j, k, k1, l, m0, m, m1, m2, n, n1, mm1, ti, node2;
     m = C1[SelN];
-    //  swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
+    // WYY: swap(m1, m), where m is to be added, and m1 to be removed. m and m1 have no edge.
     m1 = BC[m];
     for(ti=0; ti<len; ti++) {
         m2 = cruset[ti];
@@ -2535,7 +3087,32 @@ int plateau_scc_with_tabu(int SelN) {
     }
     return 1;   
 }
-
+// WYY: C0 is the set of nodes that can be added? and C1 is the set nodes that can be swapped with?
+/*int selectC0_random( )
+  {
+  int i, j, k, l, m;
+  l = 0;
+  if( len0 > 30 )
+  {
+  k = randomInt( len0 );
+  return k;
+  }
+  for( i = 0; i < len0; i++ )
+  {
+  k = C0[ i ];
+  if( tabuin[ k ] <= Iter )
+  TC1[ l++ ] = i;
+  }
+  if( l == 0 )
+  return -1;
+  else
+  {
+  k = randomInt( l );
+  k = TC1[ k ];
+  return k;
+  }
+  }
+  */
 int selectC0_random() 
 {
     if (0 != len0) {
@@ -2591,8 +3168,8 @@ inline void clique_construction()
         if( am != -1 )
         {
             Num_Iter++;
-            expand_ptr( am );
             Iter++;
+            expand_ptr( am );
         }
         else 
             break;
@@ -2672,14 +3249,16 @@ long long tabu_constant(int Max_Iter) {
         if (perform_random_walk) {
             //prob = rand()%MY_RAND_MAX_INT;
             prob = rng.nextClosed();
-    
+            //cout << "prob: " << prob << endl;
+            //if (prob < random_walk_prob*100000) { // random walk default:0.01 
             if (prob < random_walk_prob) { // random walk default:0.01 
+                //cout << "prob: " << prob << " random walk prob: " <<random_walk_prob << endl; 
                 p_operation = rand()%100;
                 if (p_operation < random_add_prob && 0 != len0) { // 33
                     Num_Iter++;
+                    Iter++;
                     add_index = rand()%len0;
                     l = expand_ptr(add_index);
-                    Iter++;
                     if(Wbest == Waim)
                         return Wbest;
                 }
@@ -2696,16 +3275,16 @@ long long tabu_constant(int Max_Iter) {
                         }
                         BC[m] = k;
                     }
-                    l = plateau_ptr(swap_index);
                     Iter++;
+                    l = plateau_ptr(swap_index);
                     if(Wbest == Waim)
                         return Wbest;
                 }
                 else if (0 != len) { // 33
                     Num_Iter++;
+                    Iter++;
                     drop_index = rand()%len;
                     l = backtract_ptr(drop_index);  // drop
-                    Iter++;
                 }
                 else {
                     return Wbest;
@@ -2767,6 +3346,8 @@ long long tabu_constant(int Max_Iter) {
         //prob = rng.nextClosed();
         prob = rand()%MY_RAND_MAX_INT;
         prob1 = rand()%MY_RAND_MAX_INT;
+        //update by cy 2019-07-17 
+        //prob2 = rand()%MY_RAND_MAX_INT;
         prob2 = rng.nextClosed();
         if (perform_update_weight && prob < div_prob*100000) { // default: 0.05
             am1 = WselectC1_crafted_weight();
@@ -2877,7 +3458,219 @@ inline int rand_index_in_clique()
     if(len) return rand() % len;
     return -1;
 }
+/*
+   long long tabu_dynamic(int Max_Iter) {
+   int i, j, k, l, bestlen = 0, am, am1, ti, m1, m, n; 
+   long long ww, ww1, ww2;
+   Iter = 0;
+   clearGamma();
+//restart
+#ifdef clique_hash_mode
+last_step_improved = 1;
+#endif
+int add_index = 0;
+    int p_search = 0;
+    int p_operation = 0;
+    int total_operation_len = 0;
+    while(1)
+    {
+        if(len == 0)
+        {
+            clique_construction();
+            //restart
+#ifdef clique_hash_mode
+            last_step_improved = 1;
+#endif
+        }
 
+        if(Wbest > lbest) {
+            times(&finish);
+            double finish_time = double(finish.tms_utime - start.tms_utime + finish.tms_stime - start.tms_stime)/sysconf(_SC_CLK_TCK);
+            finish_time = round(finish_time * 100)/100.0;
+            lbest = Wbest;
+            real_solve1 = real_solve2;
+            printf("c %.2f %lld %lld\n", real_solve1,lbest,Num_Iter);
+#ifdef NDEBUG
+            for(int i = 0; i < Max_Vtx; i++) TTbest[i] = vectex[i];
+#endif
+            if(finish_time>time_limit){
+#ifdef NDEBUG
+                verify();
+                print_solution();
+#endif
+                free_memory();
+                exit(0);
+            } 
+        }
+        else if(0 == Iter%1000){
+            times(&finish);
+            double finish_time = double(finish.tms_utime - start.tms_utime + finish.tms_stime - start.tms_stime)/sysconf(_SC_CLK_TCK);
+            finish_time = round(finish_time * 100)/100.0;
+            if(finish_time>time_limit){
+#ifdef NDEBUG
+                verify();
+                print_solution();
+#endif
+                free_memory();
+                exit(0);
+            }
+        }
+        // random walk
+        if (perform_random_walk) {
+            p_search = rand()%MY_RAND_MAX_INT;
+            if (p_search < random_walk_prob*100000) { // random walk 
+                p_operation = rand()%100;
+                if (p_operation < random_add_prob && 0 != len0) {
+                    Num_Iter++;
+                    add_index = rand()%len0;
+                    l = expand_ptr(add_index);
+                    Iter++;
+                    if(Wbest == Waim)
+                        return Wbest;
+                }
+                else if (p_operation < random_swap_prob && 0 != len1) {
+                    Num_Iter++;
+                    int swap_index = rand()%len1;
+                    m = C1[swap_index];
+                    n = BC[m];
+                    if((vectex[n] != 1) || (0 != Edge[m][n])) {
+                        for(j=0; j<len; j++) {
+                            k = cruset[j];
+                            if(0 == Edge[m][k])
+                                break;
+                        }
+                        BC[m] = k;
+                    }
+                    l = plateau_ptr(swap_index);
+                    Iter++;
+                    if(Wbest == Waim)
+                        return Wbest;
+                }
+                else if (0 != len) {
+                    Num_Iter++;
+                    int drop_index = rand()%len;
+                    l = backtract_ptr(drop_index);  // drop
+                    Iter++;
+                }
+                else {
+                    return Wbest;
+                }
+                continue;
+            }
+        }
+        // intensification 
+        am = WselectC0();
+        if(len == 1)//when |C|=1, forbid swapping, base-1
+        {
+            am1 = -1;
+        }
+        else
+        {
+            am1 = WselectC1();
+        }
+
+#ifdef first_improved_revisit_restart_mode
+        int is_first_improved_step = 0;
+#endif
+
+        ww = We[ C0[ am ] ];
+        ww1 = We[ C1[ am1 ] ] - We[ BC[ C1[ am1 ] ] ];
+        //should test whether restart is needed
+
+        if(am != -1)
+        {
+#ifdef first_improved_revisit_restart_mode
+            if(!last_step_improved)
+            { 
+                is_first_improved_step = 1;
+            }
+#endif
+            if( am1 != -1 )
+            {
+                if( ww > ww1 )
+                {
+                    Num_Iter++;
+                    expand_ptr( am );  
+                    Iter++;
+                }
+                else
+                {
+                    Num_Iter++;
+                    plateau_ptr( am1 );
+                    Iter++;
+                }
+            }
+            else if( am1 == -1 )//add-set is not empty; swap-set is empty
+            {
+                Num_Iter++;
+                expand_ptr( am );
+                Iter++;
+            }
+            //restart
+#ifdef clique_hash_mode
+            last_step_improved = 1;
+#endif
+        }
+        else
+        {
+            //restart
+#ifdef clique_hash_mode
+            if(am1 == -1 || ww1 <= 0)
+            {
+                last_step_improved = 0;
+            }
+            else
+            {
+#ifdef first_improved_revisit_restart_mode
+                if(!last_step_improved)
+                {
+                    is_first_improved_step = 1;
+                }
+#endif
+                last_step_improved = 1;
+            }	
+#endif
+            ti = Mumi_Weigt_greedy();					 
+            if( am1 != -1 )//add-set is empty; swap-set is not empty
+            {
+                m1 = cruset[ ti ];
+                ww2 = - We[ m1 ];
+                if( ww1 > ww2 )
+                {
+                    Num_Iter++;
+                    plateau_ptr( am1 );
+                    Iter++;
+                }
+                else
+                {
+                    Num_Iter++;
+                    backtract_ptr(ti);
+                    Iter++;
+                }
+            }
+            else//add-set is empty; swap-set is empty
+            {
+                Num_Iter++;
+                backtract_ptr(Mumi_Weigt_ptr());
+                Iter++;
+            }
+        }
+
+#ifdef first_improved_revisit_restart_mode
+        if(is_first_improved_step)
+        {
+            ptr_to_hashed_clique->mark_hash_entry();
+            if(ptr_to_hashed_clique->curr_hash_entry_marked_too_frequently())
+            {
+                return Wbest;
+            }
+        }
+#endif
+    }
+
+    return Wbest;
+}
+*/
 long long tabu_consecutive(int Max_Iter) {
     int i, j, k, l, bestlen = 0, am, am1, ti, m1; 
     long long ww, ww1, ww2;
@@ -2978,3 +3771,158 @@ long long tabu_consecutive(int Max_Iter) {
     }
     return Wbest;
 }
+/*
+long long tabu_dynamic_and_constant(int Max_Iter) {
+    int i, j, k, l, bestlen = 0, am, am1, ti, m1;
+    long long ww, ww1, ww2;
+    Iter = 0;
+    clearGamma();
+    //restart
+#ifdef clique_hash_mode
+    //if (restart_dynamic) {
+    last_step_improved = 1;
+    //}
+#endif
+
+    while(1)
+    {
+        if (Iter >= Max_Iter) {
+            return Wbest;
+        }
+        if(len == 0)
+        {
+            clique_construction();
+            //restart
+#ifdef clique_hash_mode
+            last_step_improved = 1;
+#endif
+        }
+        am = WselectC0();
+
+        if(len == 1)//when |C|=1, forbid swapping, base-1
+        {
+            am1 = -1;
+        }
+        else
+        {
+            am1 = WselectC1();
+        }
+
+#ifdef first_improved_revisit_restart_mode
+        int is_first_improved_step = 0;
+#endif
+
+        ww = We[ C0[ am ] ];
+        ww1 = We[ C1[ am1 ] ] - We[ BC[ C1[ am1 ] ] ];
+        //should test whether restart is needed
+
+        if(am != -1)
+        {
+#ifdef first_improved_revisit_restart_mode
+            if(!last_step_improved)
+            { 
+                is_first_improved_step = 1;
+            }
+#endif
+            if( am1 != -1 )
+            {
+                if( ww > ww1 )
+                {
+                    Num_Iter++;
+                    expand_ptr( am );  
+                    Iter++;
+                }
+                else
+                {
+                    Num_Iter++;
+                    plateau_ptr( am1 );
+                    Iter++;
+                }
+            }
+            else if( am1 == -1 )//add-set is not empty; swap-set is empty
+            {
+                Num_Iter++;
+                expand_ptr( am );
+                Iter++;
+            }
+            //restart
+#ifdef clique_hash_mode
+            last_step_improved = 1;
+#endif
+        }
+        else
+        {
+            //restart
+#ifdef clique_hash_mode
+            if(am1 == -1 || ww1 <= 0)
+            {
+                last_step_improved = 0;
+            }
+            else
+            {
+#ifdef first_improved_revisit_restart_mode
+                if(!last_step_improved)
+                {
+                    is_first_improved_step = 1;
+                }
+#endif
+                last_step_improved = 1;
+            }	
+#endif
+            ti = Mumi_Weigt_greedy();					 
+            if( am1 != -1 )//add-set is empty; swap-set is not empty
+            {
+                m1 = cruset[ ti ];
+                ww2 = - We[ m1 ];
+                if( ww1 > ww2 )
+                {
+                    Num_Iter++;
+                    plateau_ptr( am1 );
+                    Iter++;
+                }
+                else
+                {
+                    Num_Iter++;
+                    backtract_ptr(ti);		               
+                    Iter++;
+                }
+            }
+            else//add-set is empty; swap-set is empty
+            {
+                Num_Iter++;
+                backtract_ptr(Mumi_Weigt_ptr());
+                Iter++;
+            }
+        }
+
+#ifdef first_improved_revisit_restart_mode
+        if(is_first_improved_step)
+        {
+            ptr_to_hashed_clique->mark_hash_entry();
+            if(ptr_to_hashed_clique->curr_hash_entry_marked_too_frequently())
+            {
+                return Wbest;
+                //drop_clear();
+                //Iter++;
+                //continue;
+            }
+        }
+#endif
+        times(&finish);
+        double finish_time = double(finish.tms_utime - start.tms_utime + finish.tms_stime - start.tms_stime)/sysconf(_SC_CLK_TCK);
+        finish_time = round(finish_time * 100)/100.0;
+        if(Wbest>lbest){
+            lbest=Wbest;
+            real_solve1=real_solve2;
+            printf("c	%.2f	%lld  %lld\n", real_solve1,lbest,Num_Iter);
+            //printf("o %d\n", Max_num-lbest);
+        }
+        if(finish_time>time_limit){
+            free_memory();
+            exit(0);
+        } 
+    }
+
+    return Wbest;
+}
+*/

@@ -1,0 +1,18 @@
+bms categorical {0,1} [1]
+bn integer [1,100] [50]
+bn|bms in {1}
+bt categorical {0,1} [0]
+cons categorical {0,1,2} [0]
+drop categorical {0,1,2} [0]
+p_rs categorical {0,1} [0]
+p_rw categorical {0,1} [1]
+{p_rs=0, p_rw=0}
+rd_prob categorical {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} [0.2]
+rd_prob|drop in {1}
+res_prob real [0.0000001,0.0001] [0.000001]
+res_prob|p_rs in {1}
+rw_prob real [0.00001,0.1] [0.0001]
+rw_prob|p_rw in {1}
+tabu categorical {0,1} [1]
+tabul integer [1,100] [7]
+tabul|tabu in {1}

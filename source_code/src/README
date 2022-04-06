@@ -1,0 +1,24 @@
+https://github.com/filyouzicha/PbO-MWC
+
+
+PbO for Maximum Vertex Weight Clique Problem
+
+./PbO-MWC -inst "instance-file" -seed "seed-num" -cutoff "cutoff-time"
+
+#frb
+eg: an optimal configuration for solving frb instances (weighted version)
+./PbO-MWC -inst /filedir/frb45-21-1.clq -seed 1 -cutoff 60 -bms 0 -bt 1 -cons 0 -drop 1 -p_rs 0 -p_rw 1 -rd_prob 0.3 -rw_prob 0.08343949850000884 -tabu 1 -tabul 3
+
+#dimacs MANN
+eg: an optimal configuration for solving dimacs instances (weighted version) - MANN family
+./PbO-MWC -inst /filedir/MANN_a45.clq -seed 1 -cutoff 60 -bms 0  -bt 1  -cons 0  -drop 1  -p_rs 1  -p_rw 1  -rd_prob 0.3  -res_prob 3.874095018590378E-6  -rw_prob 0.002592174400640285  -tabu 0
+
+#dimacs except MANN
+eg: an optimal configuration for solving dimacs instances (weighted version) - except MANN family
+./PbO-MWC -inst /filedir/brock800_4.clq  -seed 1 -cutoff 60 -bms 0  -bt 1  -cons 0  -drop 1  -p_rs 1  -p_rw 1  -rd_prob 0.9  -res_prob 5.134618899663661E-5  -rw_prob 0.0809256555960982  -tabu 0
+
+#kes
+./PbO-MWC -inst /filedir/110.wclq -seed 1 -cutoff 60 -bms 1  -bn 5  -bt 0  -cons 1  -drop 2  -p_rs 1  -p_rw 0  -res_prob 3.5200327579917024E-5  -tabu 1  -tabul 10
+
+#ref
+./PbO-MWC -inst /filedir/ref-10-20.wclq -seed 1 -cutoff 60 -bms 1 -bn 22 -bt 1 -cons 2 -drop 1 -p_rs 1  -p_rw 0 -rd_prob 0.8 -res_prob 7.696004591828833E-5 -tabu 2 -tabul2 2

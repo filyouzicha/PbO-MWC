@@ -1,10 +1,20 @@
 // =====================================================================================
-//    Description:  This is a solver for weighted maximum clique problem by Programming by Optimization
 //
-//    Version:  1.0
-//    Compiler:  g++
-//    Author:  Yi
+//       Filename:  .cpp
+//
+//    Description:  This is a solver for weighted maximum clique problem based on SCC and BMS
+//
+//        Version:  1.0
+//        Created:  
+//       Revision:  none
+//       Compiler:  g++
+//
+//         Author:  
+
+//         For example：
 // =====================================================================================
+
+
 
 #include "basis.h"
 #include "parse_parameters.h"
@@ -15,6 +25,7 @@
 #define MAXE	80000000
 
 int BMS=100;
+//long long Max_num = 3179769846193;
 long long Max_num = 3000000000000;
 tms start, finish;
 double time_limit;
@@ -27,7 +38,9 @@ struct Edge1{
 };
 int** Edge;
 int** edge_forbidden;
+//Edge1 edge[MAXE];  
 Edge1* edge = NULL;
+//int v_degree_tmp[MAXV];
 int* v_degree_tmp = NULL;
 
 //int adjaclen[MAXV];
@@ -59,8 +72,8 @@ int* cruset = NULL;
 int len;
 int tm1;
 int tm2;
-int* C0 = NULL; // the candidates node for ADD operation
-int* C1 = NULL; // the Candidate nodes for SWAP operation
+int* C0 = NULL; // the candidates node for ADD operation?
+int* C1 = NULL; // the Candidate nodes for SWAP operation?
 long long* We = NULL; // Weights of nodes
 double* We_penalty = NULL; // Weights of nodes
 int* BC = NULL;
@@ -68,7 +81,7 @@ int* BC = NULL;
 int len0; // the length of C0
 int len1; // the length of C1
 
-int* TC1 = NULL; // Temporal candidate nodes
+int* TC1 = NULL; // Temporal candidate nodes?
 
 long long Iter; // the number of iterations taken
 int TABUL = 7;
@@ -109,6 +122,20 @@ int last_step_improved = 1;
 bool restart_dynamic = false;
 //#endif
 
+/************************************************************************/
+/*   WYY: Variables for Configuration Checking                    */
+/************************************************************************/
+/* neighbor[i][j] = n means that i and n are connceted, and n is the jth 
+ *  neighbor of n.
+ */
+
+/* time_stamp[m]=j means the conf_change value of node m recently 
+ * changes at jth iteration.
+ */
+
+//struct  timeval start;
+//struct  timeval end;
+
 void dump_neighborhood();
 #define DEBUG 0
 ///////////////////////////
@@ -123,6 +150,28 @@ int edge_is(int m, int n)
     return 1;
 }
 
+/*void new_hash_constant (int num) {
+    return;
+}
+void delete_hash_constant () {
+    return;
+}
+void reset_hash_constant () {
+    return;
+}
+void new_hash_dynamic (int num) {
+    ptr_to_hashed_clique = new CliqueHash(num);
+    return;
+}
+void delete_hash_dynamic () {
+    delete ptr_to_hashed_clique;
+    return;
+}
+void reset_hash_dynamic () {
+    ptr_to_hashed_clique->reset_hash_entry();
+    return;
+}
+*/
 void malloc_memory(int countv, int counte) {
     int max_vtx = countv + 2;
     int max_edge = counte + 2;
@@ -321,6 +370,7 @@ void Initializing()
     } while (p != "p");
     cout << Max_Vtx << " " << nb_edg << endl;
     malloc_memory(Max_Vtx, nb_edg);
+    cout << "------- end malloc memory" << endl;
     //FIC >> tt >> Max_Vtx >> nb_edg;
     //neighbor=(int **)malloc(Max_Vtx*sizeof(int*));//neighbor set
     neighbor.resize(Max_Vtx);//neighbor set
@@ -455,6 +505,9 @@ void Initializing()
     FIC.close();
 }
 
+
+
+// WYY
 void dump_conf_change() {
     printf("\nconf_change:\n");
     for(int i = 0; i < Max_Vtx; i++) {
@@ -463,6 +516,7 @@ void dump_conf_change() {
     printf("\n");
 }
 
+// WYY
 void dump_neighborhood() {
     printf("Neighborhood:\n");
     for(int i = 0; i < Max_Vtx; i++) {
@@ -474,6 +528,7 @@ void dump_neighborhood() {
     return;
 }
 
+// WYY
 void dump_cur_clique() {
     return;
     int n;
@@ -504,6 +559,7 @@ void clearGamma()
     {
         C0[ i ] = i;
         address[ i ] = i;
+        // wyy: clear configuration Information for the next restart
         conf_change[i] = 1;
         //time_stamp[i] = 0; //modify by cy according to NuMVC
     }
@@ -519,6 +575,8 @@ void clearGamma()
 #endif
 }
 
+// WYY: Select from C0, a node, which is not in tabu and has the max weight, 
+// or satisfy the aspiration rule though in tabu.
 int WselectC0() {
     int i, j, k, l1, l2, m;
     l1 = 0;
@@ -527,6 +585,7 @@ int WselectC0() {
 
     for (i=0; i<len0; i++) {
         k = C0[i];
+        // WYY:store nodes that are not in tabu list and with the maximum weight, in FC1
         if (!is_forbidden_ptr(k)) {
             if (We[ k ] > w1) {
                 l1 = 0;
@@ -537,7 +596,7 @@ int WselectC0() {
                 FC1[l1++] = i;
             }
         }
-        else {  
+        else {  // WYY: stores nodes that are being in tabu but with the maximum weight, in TC1
             if (We[ k ] > w2) {
                 l2 = 0;
                 w2 = We[k];
@@ -549,13 +608,18 @@ int WselectC0() {
         }
     }
 
-    // to check first if the aspiration rule is applicable.
+    // WYY: to check first if the aspiration rule is applicable.
     // If not, select a nodes which have the highest weithgts; break ties randomly.
     if( (l2 > 0) && ((w2+Wf)>Wbest) && (w2>w1)) { 
+        // WYY: Select the node with the oldest age
         // modify by cy
+        //if (TABUL > 3)
+        //    TABUL--;
         return breaking_tie_ptr(TC1, l2, C0);
+        //cout << "add: yes in aspiration w2+Wf = " << w2+Wf << endl;
     }  
     else if( l1 > 0 ) {
+        // WYY
         // modify by cy
         return breaking_tie_ptr(FC1, l1, C0);
     }
@@ -605,6 +669,7 @@ int WselectC1() {
    
     select_var_from_C1_ptr(l1, l2, w1, w2);
     if ( (l2 > 0) && (w2 > w1) && ((w2+Wf) > Wbest) ) {
+        //cout << "swap: yes in aspiration w2+Wf = " << w2+Wf << endl;
         return breaking_tie_ptr(TC1, l2, C1);
     }  
     else if (l1 > 0) {
@@ -615,13 +680,15 @@ int WselectC1() {
     }
 }
 
-// find nodes with minimum weight in the current clique to remove
+// WYY: find nodes with minimum weight in the current clique to remove
 int Mumi_Weigt_probability() {
     double p = rng.nextClosed();
     if (p < drop_random_prob) {
+        //cout << "random" << endl;
         return Mumi_Weigt_random();
     }
     else {
+        //cout << "greedy" << endl;
         return Mumi_Weigt_greedy();
     }
 }
@@ -633,48 +700,35 @@ int Mumi_Weigt_random(){
         return randomInt(len);
 }
 int Mumi_Weigt_greedy() {
-    int i, j, k, l1=0,l2=0, m;
+    int i, j, k, l1, m;
     long long w1 = 9223372036854775807;
-    long long w2 = 9223372036854775807;
-    // find in cruset the nodes with lowest weights, chose one of it randomly
+    l1 = 0;
+    // WYY: find in cruset the nodes with lowest weights, chose one of it randomly
     for( i = 0; i < len; i++ ) {
         k = cruset[ i ];
-        if (!is_forbidden_ptr(k)) {
-            if( We[ k ] < w1 ) {
-                l1 = 0;
-                w1 = We[ k ];
-                FC1[ l1++ ] = i;
-            }
-            else if ( We[ k ] == w1 ) {
-                FC1[ l1++ ] = i;
-            }
+        if( We[ k ] < w1 ) {
+            l1 = 0;
+            w1 = We[ k ];
+            FC1[ l1++ ] = i;
         }
-        else {
-            if( We[ k ] < w2 ) {
-                l2 = 0;
-                w2 = We[ k ];
-                TC1[ l2++ ] = i;
-            }
-            else if ( We[ k ] == w2 ) {
-                TC1[ l2++ ] = i;
-            }
+        else if ( We[ k ] == w1 ) {
+            FC1[ l1++ ] = i;
         }
     }
 
-    if( l1 == 0 && l2 == 0) {
+    if( l1 == 0 ) {
         return -1;
     }
-    else if (l1 != 0)
-        return FC1[randomInt(l1)];
-    else 
-        return TC1[randomInt(l2)];
+    return FC1[randomInt(l1)];
 }
 int Mumi_Weigt_probability_crafted_weight() {
     double p = rng.nextClosed();
     if (p < drop_random_prob) {
+        //cout << "random" << endl;
         return Mumi_Weigt_random();
     }
     else {
+        //cout << "greedy" << endl;
         return Mumi_Weigt_greedy_crafted_weight();
     }
 }
@@ -683,7 +737,7 @@ int Mumi_Weigt_greedy_crafted_weight() {
     int i, j, k, l1, m;
     double w1 = 9223372036854775807, ww2 = 0;
     l1 = 0;
-    // find in cruset the nodes with lowest weights, chose one of it randomly
+    // WYY: find in cruset the nodes with lowest weights, chose one of it randomly
     for (i = 0; i < len; i++) {
         k = cruset[i];
         //ww2 = -We_penalty[k];
@@ -720,7 +774,7 @@ void verify()
     cout << "verified" << endl;
 }
 
-// Validate that the cruset is indeed a clique
+// WYY: Validate that the cruset is indeed a clique
 void validate() {
     int i, j, k1, k2, l, m;
     for( i = 0; i < Max_Vtx; i++ )
@@ -757,7 +811,7 @@ void Output()
                 W_used[ i ], Iteration[ i ], len_used[ i ],  time_used[ i ] ); 
     }
 
-    fclose(fp);
+    fclose(fp); // WYY
     return;
 
     fprintf(fp, "\n\n the total information: \n");
@@ -829,6 +883,7 @@ long long Max_Tabu()
         finish_time = round(finish_time * 100)/100.0;
         if(finish_time>time_limit) {
             printf("o	%.2f	%lld  %lld\n", real_solve1,lbest, Num_Iter);
+           //printf("o %d\n", Max_num-lbest);
 #ifdef NDEBUG
             verify();
             print_solution();
@@ -859,7 +914,10 @@ int seed;
 int main(int argc, char **argv)
 {
     Waim=9223372036854775807;
+    //File_Name = argv[1];
     Wmode=200;
+    //time_limit=atof(argv[2]);
+    //seed = atoi(argv[3]);
     if (argc<7) {
         cout << "./Meta -inst <inst> -seed <seed> -cutoff <cutoff_time>" << endl;
         exit(0);
@@ -869,7 +927,9 @@ int main(int argc, char **argv)
     printf("c	%s\n",argv[1]);
     srand(seed);
     rng.seed(seed);
+    cout << "------- start Init" << endl;
     Initializing();
+    cout << "------- end Init" << endl;
     tm1 = Max_Vtx*sizeof( int );
     int i;
     long long l = 0;
@@ -884,6 +944,7 @@ int main(int argc, char **argv)
 #ifdef NDEBUG
             for(int i = 0; i < Max_Vtx; i++) TTbest[i] = vectex[i];
 #endif
+        //printf("o %d\n", Max_num-lbest);
     }
 #ifdef NDEBUG
             verify();

@@ -1,0 +1,1 @@
+./PbO-MWC -inst /filedir/frb45-21-1.clq -seed 1 -cutoff 60 -bms 1  -bn 50  -bt 0  -cons 0  -drop 0  -p_rs 0  -p_rw 1  -rw_prob 1.0E-4  -tabu 1  -tabul 7

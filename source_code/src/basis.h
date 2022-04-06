@@ -19,8 +19,8 @@
 #include <assert.h>
 using namespace std;
 
-//#define FORMAT_WCLQ
-#define FORMAT_CLQ
+#define FORMAT_WCLQ
+//#define FORMAT_CLQ
 //#define GRAPH_REDUCTION
 #define NDEBUG
 struct Remaining_vertex {

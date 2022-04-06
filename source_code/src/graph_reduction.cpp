@@ -36,6 +36,7 @@ void graph_reduction(int threshold) {
 
 void graph_reduction_iterative(int threshold) {
 
+    cout << "-------: graph reduction iterative" << endl;
 	working_vertex.clear();  //clear
 	next_working_vertex.clear();  //clear
 	for (auto v : remaining_vertex) {

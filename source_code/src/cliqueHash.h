@@ -39,6 +39,7 @@ public:
 	}
 	void update_hash_wrt_add(int v)
 	{
+        //cout << "-------: " << two_power_mod_p[v] << endl;
 		curr_hash_entry = (curr_hash_entry + two_power_mod_p[v]) % PRIME_NUM;
 	}
 	void update_hash_wrt_drop(int v)
