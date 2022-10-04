@@ -39,10 +39,13 @@
 
 ---
 2. the benchmarks used
-  https://github.com/jamestrimble/max-weight-clique-instances
+
+    https://github.com/jamestrimble/max-weight-clique-instances
 
 ---
 3. the detailed results and the configurations of PbO-MWC
-  Appendix-Detailed-results and Scatter-plots.pdf
-  Appendix-Configurations of PbO-MWC.pdf
+
+    Appendix-Detailed-results and Scatter-plots.pdf
+  
+    Appendix-Configurations of PbO-MWC.pdf
   
