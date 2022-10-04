@@ -1108,6 +1108,7 @@ int backtract_cc(int SelN) {
     }
     //restart
     //update_hash_backtract_ptr(m1);
+    return 0;
 }
 int backtract_scc_tabu(int SelN) {
     int i, j, k, l, m, m1, n, k1, n1;
