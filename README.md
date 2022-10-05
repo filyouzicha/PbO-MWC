@@ -39,6 +39,10 @@
 
 ---
 2. the benchmarks used
+    
+    BHOSLIB dir
+    
+    DIMACS dir
 
     https://github.com/jamestrimble/max-weight-clique-instances
 
